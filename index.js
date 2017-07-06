@@ -4,6 +4,7 @@ const fs = require('fs')
 const https = require('https')
 
 exports.handler = (event, context, callback) => {
+  console.log(event)
   const basepath = event.path
 
   const url = 'https://www.gov.uk/api/content' + basepath
@@ -17,8 +18,16 @@ exports.handler = (event, context, callback) => {
     res.on('data', (chunk) => { rawData += chunk })
     res.on('end', () => {
       console.log('No more data in response.')
-      const contentItem = JSON.parse(rawData)
-      const title = contentItem.title
+
+      var title = "GOV.UK"
+      try {
+        const contentItem = JSON.parse(rawData)
+        title = contentItem.title
+      }
+      catch (e) {
+        console.log('Error parsing JSON')
+      }
+
       render(title, callback)
     })
   })
@@ -43,6 +52,7 @@ function render (title, callback) {
     '-font', 'GDSTransportBold.ttf',
     '-pointsize', pointsize,
     '-size', '1040x310',
+    '-interline-spacing', '-10',
     'caption:' + title,
     '-gravity', 'North',
     'base.png',
@@ -72,7 +82,13 @@ function render (title, callback) {
         }
         console.log('done')
         var base64data = Buffer.from(data).toString('base64')
-        callback(null, {'statusCode': 200, 'body': base64data})
+
+        callback(null, {
+          'statusCode': 200,
+          'headers': { "Content-Type": "image/png" },
+          'body': base64data,
+          'isBase64Encoded': true
+        })
       })
     }
   })

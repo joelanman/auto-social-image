@@ -4,7 +4,8 @@ convert -fill white \
         -font GDSTransportBold.ttf \
         -pointsize 72 \
         -size 1040x310 \
-        caption:'Hi Ralph this is cool' \
+        -interline-spacing -10 \
+        caption:'MMMMMMMMMMMMMMMMMMMMMM MMMMMMMMMMMMMMMMMMMMMMMMMMM MMMMMMMMMMMMMMMMMMMMMMM' \
         -gravity North \
         base.png \
         +swap \
