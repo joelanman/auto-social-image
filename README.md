@@ -18,3 +18,15 @@ The script then sets a font size depending on how long the title is, and runs `c
 PNG image.
 
 The script then returns the PNG as a base64 encoded string.
+
+## Test locally
+
+You need Node.js and ImageMagick installed.
+
+Run `node test`
+
+This will render the image for Register to vote and put it in the `output` folder.
+
+You can also add any path on GOV.UK for example:
+
+`node test browse/driving`
