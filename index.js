@@ -12,20 +12,21 @@ exports.handler = (event, context, callback) => {
 
   const req = https.get(url, (res) => {
     console.log(`STATUS: ${res.statusCode}`)
-    console.log(`HEADERS: ${JSON.stringify(res.headers)}`)
+    console.log(`HEADERS: ${JSON.stringify(res.headers, null, '  ')}`)
     let rawData = ''
     res.setEncoding('utf8')
     res.on('data', (chunk) => { rawData += chunk })
     res.on('end', () => {
       console.log('No more data in response.')
 
-      var title = "GOV.UK"
+      var title = 'GOV.UK'
       try {
         const contentItem = JSON.parse(rawData)
+        console.log(`contentItem: ${JSON.stringify(contentItem, null, '  ')}`)
         title = contentItem.title
-      }
-      catch (e) {
+      } catch (e) {
         console.log('Error parsing JSON')
+        renderGeneric(callback)
       }
 
       render(title, callback)
@@ -36,6 +37,11 @@ exports.handler = (event, context, callback) => {
 }
 
 function render (title, callback) {
+  if (typeof title !== 'string') {
+    console.log('title is not a string')
+    renderGeneric(callback)
+    return
+  }
   var length = title.length
   var pointsize = 88
 
@@ -44,7 +50,9 @@ function render (title, callback) {
   } else if (length > 76 && length <= 130) {
     pointsize = 46
   } else if (length > 130) {
-    // TODO render default image - this title is too long
+    console.log('title is longer than 130 characters')
+    renderGeneric(callback)
+    return
   }
 
   var convertChild = child.spawn('convert', ['-fill', 'white',
@@ -85,11 +93,31 @@ function render (title, callback) {
 
         callback(null, {
           'statusCode': 200,
-          'headers': { "Content-Type": "image/png" },
+          'headers': { 'Content-Type': 'image/png' },
           'body': base64data,
           'isBase64Encoded': true
         })
       })
     }
+  })
+}
+
+function renderGeneric (callback) {
+  console.log('rendering generic image')
+  const filepath = './generic.png'
+  fs.readFile(filepath, function (err, data) {
+    if (err) {
+      console.error('error reading generic file')
+      return
+    }
+    console.log('done')
+    var base64data = Buffer.from(data).toString('base64')
+
+    callback(null, {
+      'statusCode': 200,
+      'headers': { 'Content-Type': 'image/png' },
+      'body': base64data,
+      'isBase64Encoded': true
+    })
   })
 }
